@@ -26,7 +26,8 @@ static PyObject *PyImfpMeasure(PyObject *self, PyObject *args, PyObject *kwds)
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "ObO!dili", kwlist, &img_obj, &barrier, &PyArray_Type, &f_obj, &dpix, &nsample, &seed, &dflag)) {
 		return NULL;
 	}
-	img_arr = (PyArrayObject *)PyArray_FROM_OTF(img_obj, NPY_UINT8, NPY_IN_ARRAY);
+	img_arr = (PyArrayObject *)PyArray_FROM_OTF(img_obj,
+		NPY_UINT8, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED);
 	if (img_arr == NULL) return NULL;
 	if (PyArray_NDIM(img_arr) != 2) {
 		Py_XDECREF(img_arr);
@@ -37,7 +38,8 @@ static PyObject *PyImfpMeasure(PyObject *self, PyObject *args, PyObject *kwds)
 	img_width = PyArray_DIM(img_arr, 1);
 	img_strides = PyArray_STRIDES(img_arr);
 	img_data = (unsigned char *)PyArray_DATA(img_arr);
-	f_arr = (PyArrayObject *)PyArray_FROM_OTF(f_obj, NPY_UINT, NPY_INOUT_ARRAY);
+	f_arr = (PyArrayObject *)PyArray_FROM_OTF(f_obj, NPY_UINT,
+		NPY_ARRAY_WRITEABLE | NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED);
 	if (f_arr == NULL) {
 		Py_XDECREF(img_arr);
 		return NULL;
@@ -76,15 +78,15 @@ static struct PyModuleDef IMFPModuleDef = {
 #ifndef PY3
 PyMODINIT_FUNC initMPImfp(void)
 {
-	Py_InitModule3("MPImfp", PyImfpMethods, "MPImfp extention");
 	import_array();
+	Py_InitModule3("MPImfp", PyImfpMethods, "MPImfp extention");
 	return;
 }
 #else
 PyMODINIT_FUNC PyInit_MPImfp(void)
 {
-	PyObject* m = PyModule_Create(&IMFPModuleDef);
 	import_array();
+	PyObject* m = PyModule_Create(&IMFPModuleDef);
 	return m;
 }
 #endif
